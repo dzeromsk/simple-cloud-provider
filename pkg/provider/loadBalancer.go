@@ -68,15 +68,14 @@ func (k *simpleLoadBalancerManager) GetLoadBalancer(ctx context.Context, cluster
 
 	for x := range svc.Services {
 		if svc.Services[x].UID == string(service.UID) {
-			return &service.Status.LoadBalancer, true, nil
-
-			// return &v1.LoadBalancerStatus{
-			// 	Ingress: []v1.LoadBalancerIngress{
-			// 		{
-			// 			IP: svc.Services[x].Vip,
-			// 		},
-			// 	},
-			// }, true, nil
+			// return &service.Status.LoadBalancer, true, nil
+			return &v1.LoadBalancerStatus{
+				Ingress: []v1.LoadBalancerIngress{
+					{
+						IP: svc.Services[x].Vip,
+					},
+				},
+			}, true, nil
 		}
 	}
 	return nil, false, nil
@@ -162,21 +161,20 @@ func (k *simpleLoadBalancerManager) syncLoadBalancer(ctx context.Context, servic
 	existing := svc.findService(string(service.UID))
 	if existing != nil {
 		klog.Infof("found existing service '%s' (%s) with vip %s", service.Name, service.UID, existing.Vip)
-		return &service.Status.LoadBalancer, nil
+		// return &service.Status.LoadBalancer, nil
 
 		// If this is 0.0.0.0 then it's a DHCP lease and we need to return that not the 0.0.0.0
 		// if existing.Vip == "0.0.0.0" {
 		// 	return &service.Status.LoadBalancer, nil
 		// }
 
-		// //
-		// return &v1.LoadBalancerStatus{
-		// 	Ingress: []v1.LoadBalancerIngress{
-		// 		{
-		// 			IP: existing.Vip,
-		// 		},
-		// 	},
-		// }, nil
+		return &v1.LoadBalancerStatus{
+			Ingress: []v1.LoadBalancerIngress{
+				{
+					IP: existing.Vip,
+				},
+			},
+		}, nil
 	}
 
 	if service.Spec.LoadBalancerIP == "" {
