@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  simple-cloud-provider:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2022-02-13T17:44:04.111375824Z"
+    description: A general purpose kubernetes cloud provider
+    digest: 9363f6f22d110391527bde28fe757cbb8ce85ac821511af955369334b374ceef
+    name: simple-cloud-provider
+    type: application
+    urls:
+    - https://github.com/dzeromsk/simple-cloud-provider/releases/download/simple-cloud-provider-0.1.1/simple-cloud-provider-0.1.1.tgz
+    version: 0.1.1
+generated: "2022-02-13T17:44:04.111381524Z"
