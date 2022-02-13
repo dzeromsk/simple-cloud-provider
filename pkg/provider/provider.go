@@ -20,35 +20,35 @@ var OutSideCluster bool
 
 const (
 	//ProviderName is the name of the cloud provider
-	ProviderName = "kubevip"
+	ProviderName = "simple"
 
-	//KubeVipCloudConfig is the default name of the load balancer config Map
-	KubeVipCloudConfig = "kubevip"
+	//SimpleCloudConfig is the default name of the load balancer config Map
+	SimpleCloudConfig = "simple"
 
-	//KubeVipClientConfig is the default name of the load balancer config Map
-	KubeVipClientConfig = "kubevip"
+	//SimpleClientConfig is the default name of the load balancer config Map
+	SimpleClientConfig = "simple"
 
-	//KubeVipServicesKey is the key in the ConfigMap that has the services configuration
-	KubeVipServicesKey = "kubevip-services"
+	//SimpleServicesKey is the key in the ConfigMap that has the services configuration
+	SimpleServicesKey = "simple-services"
 )
 
 func init() {
-	cloudprovider.RegisterCloudProvider(ProviderName, newKubeVipCloudProvider)
+	cloudprovider.RegisterCloudProvider(ProviderName, newSimpleCloudProvider)
 }
 
-// KubeVipCloudProvider - contains all of the interfaces for the cloud provider
-type KubeVipCloudProvider struct {
+// SimpleCloudProvider - contains all of the interfaces for the cloud provider
+type SimpleCloudProvider struct {
 	lb cloudprovider.LoadBalancer
 }
 
-var _ cloudprovider.Interface = &KubeVipCloudProvider{}
+var _ cloudprovider.Interface = &SimpleCloudProvider{}
 
-func newKubeVipCloudProvider(io.Reader) (cloudprovider.Interface, error) {
-	ns := os.Getenv("KUBEVIP_NAMESPACE")
-	cm := os.Getenv("KUBEVIP_CONFIG_MAP")
+func newSimpleCloudProvider(io.Reader) (cloudprovider.Interface, error) {
+	ns := os.Getenv("SIMPLE_NAMESPACE")
+	cm := os.Getenv("SIMPLE_CONFIG_MAP")
 
 	if cm == "" {
-		cm = KubeVipCloudConfig
+		cm = SimpleCloudConfig
 	}
 
 	if ns == "" {
@@ -79,13 +79,13 @@ func newKubeVipCloudProvider(io.Reader) (cloudprovider.Interface, error) {
 			return nil, fmt.Errorf("error creating kubernetes client: %s", err.Error())
 		}
 	}
-	return &KubeVipCloudProvider{
+	return &SimpleCloudProvider{
 		lb: newLoadBalancer(cl, ns, cm),
 	}, nil
 }
 
 // Initialize - starts the clound-provider controller
-func (p *KubeVipCloudProvider) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, stop <-chan struct{}) {
+func (p *SimpleCloudProvider) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, stop <-chan struct{}) {
 	clientset := clientBuilder.ClientOrDie("do-shared-informers")
 	sharedInformer := informers.NewSharedInformerFactory(clientset, 0)
 
@@ -98,11 +98,11 @@ func (p *KubeVipCloudProvider) Initialize(clientBuilder cloudprovider.Controller
 }
 
 // LoadBalancer returns a loadbalancer interface. Also returns true if the interface is supported, false otherwise.
-func (p *KubeVipCloudProvider) LoadBalancer() (cloudprovider.LoadBalancer, bool) {
+func (p *SimpleCloudProvider) LoadBalancer() (cloudprovider.LoadBalancer, bool) {
 	return p.lb, true
 }
 
 // ProviderName returns the cloud provider ID.
-func (p *KubeVipCloudProvider) ProviderName() string {
+func (p *SimpleCloudProvider) ProviderName() string {
 	return ProviderName
 }

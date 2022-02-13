@@ -1,4 +1,4 @@
-module github.com/kube-vip/kube-vip-cloud-provider
+module github.com/dzeromsk/simple-cloud-provider
 
 go 1.16
 

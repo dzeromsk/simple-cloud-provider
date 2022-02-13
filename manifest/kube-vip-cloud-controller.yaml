@@ -37,29 +37,29 @@ subjects:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: kube-vip-cloud-provider
+  name: simple-cloud-provider
   namespace: kube-system
 spec:
-  serviceName: kube-vip-cloud-provider
+  serviceName: simple-cloud-provider
   podManagementPolicy: OrderedReady
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
       app: kube-vip
-      component: kube-vip-cloud-provider
+      component: simple-cloud-provider
   template:
     metadata:
       labels:
         app: kube-vip
-        component: kube-vip-cloud-provider
+        component: simple-cloud-provider
     spec:
       containers:
       - command:
-        - /kube-vip-cloud-provider
+        - /simple-cloud-provider
         - --leader-elect-resource-name=kube-vip-cloud-controller
-        image: kubevip/kube-vip-cloud-provider:0.1
-        name: kube-vip-cloud-provider
+        image: simple/simple-cloud-provider:0.1
+        name: simple-cloud-provider
         imagePullPolicy: Always
         resources: {}
       dnsPolicy: ClusterFirst

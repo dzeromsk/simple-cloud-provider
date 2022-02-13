@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 # The name of the executable (default is current directory name)
-TARGET := kube-vip-cloud-provider
+TARGET := simple-cloud-provider
 .DEFAULT_GOAL: $(TARGET)
 
 # These will be provided to the target
@@ -18,7 +18,7 @@ LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -s"
 SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 DOCKERTAG=$(VERSION)
-REPOSITORY=kubevip
+REPOSITORY=simple
 
 .PHONY: all build clean install uninstall fmt simplify check run
 

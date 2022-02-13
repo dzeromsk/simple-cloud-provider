@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kube-vip/kube-vip-cloud-provider/pkg/ipam"
+	"github.com/dzeromsk/simple-cloud-provider/pkg/ipam"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -13,7 +13,7 @@ import (
 	"k8s.io/klog"
 )
 
-type kubevipServices struct {
+type simpleServices struct {
 	Services []services `json:"services"`
 }
 
@@ -26,36 +26,36 @@ type services struct {
 }
 
 //PlndrLoadBalancer -
-type kubevipLoadBalancerManager struct {
+type simpleLoadBalancerManager struct {
 	kubeClient     *kubernetes.Clientset
 	nameSpace      string
 	cloudConfigMap string
 }
 
 func newLoadBalancer(kubeClient *kubernetes.Clientset, ns, cm string) cloudprovider.LoadBalancer {
-	return &kubevipLoadBalancerManager{
+	return &simpleLoadBalancerManager{
 		kubeClient:     kubeClient,
 		nameSpace:      ns,
 		cloudConfigMap: cm,
 	}
 }
 
-func (k *kubevipLoadBalancerManager) EnsureLoadBalancer(ctx context.Context, clusterName string, service *v1.Service, nodes []*v1.Node) (lbs *v1.LoadBalancerStatus, err error) {
+func (k *simpleLoadBalancerManager) EnsureLoadBalancer(ctx context.Context, clusterName string, service *v1.Service, nodes []*v1.Node) (lbs *v1.LoadBalancerStatus, err error) {
 	return k.syncLoadBalancer(ctx, service)
 }
-func (k *kubevipLoadBalancerManager) UpdateLoadBalancer(ctx context.Context, clusterName string, service *v1.Service, nodes []*v1.Node) (err error) {
+func (k *simpleLoadBalancerManager) UpdateLoadBalancer(ctx context.Context, clusterName string, service *v1.Service, nodes []*v1.Node) (err error) {
 	_, err = k.syncLoadBalancer(ctx, service)
 	return err
 }
 
-func (k *kubevipLoadBalancerManager) EnsureLoadBalancerDeleted(ctx context.Context, clusterName string, service *v1.Service) error {
+func (k *simpleLoadBalancerManager) EnsureLoadBalancerDeleted(ctx context.Context, clusterName string, service *v1.Service) error {
 	return k.deleteLoadBalancer(ctx, service)
 }
 
-func (k *kubevipLoadBalancerManager) GetLoadBalancer(ctx context.Context, clusterName string, service *v1.Service) (status *v1.LoadBalancerStatus, exists bool, err error) {
+func (k *simpleLoadBalancerManager) GetLoadBalancer(ctx context.Context, clusterName string, service *v1.Service) (status *v1.LoadBalancerStatus, exists bool, err error) {
 
 	// Retrieve the kube-vip configuration from it's namespace
-	cm, err := k.GetConfigMap(ctx, KubeVipClientConfig, service.Namespace)
+	cm, err := k.GetConfigMap(ctx, SimpleClientConfig, service.Namespace)
 	if err != nil {
 		return nil, true, nil
 	}
@@ -84,7 +84,7 @@ func (k *kubevipLoadBalancerManager) GetLoadBalancer(ctx context.Context, cluste
 
 // GetLoadBalancerName returns the name of the load balancer. Implementations must treat the
 // *v1.Service parameter as read-only and not modify it.
-func (k *kubevipLoadBalancerManager) GetLoadBalancerName(_ context.Context, clusterName string, service *v1.Service) string {
+func (k *simpleLoadBalancerManager) GetLoadBalancerName(_ context.Context, clusterName string, service *v1.Service) string {
 	return getDefaultLoadBalancerName(service)
 }
 
@@ -92,19 +92,19 @@ func getDefaultLoadBalancerName(service *v1.Service) string {
 	return cloudprovider.DefaultLoadBalancerName(service)
 }
 
-func (k *kubevipLoadBalancerManager) deleteLoadBalancer(ctx context.Context, service *v1.Service) error {
+func (k *simpleLoadBalancerManager) deleteLoadBalancer(ctx context.Context, service *v1.Service) error {
 	klog.Infof("deleting service '%s' (%s)", service.Name, service.UID)
 
 	// Get the kube-vip (client) configuration from it's namespace
-	cm, err := k.GetConfigMap(ctx, KubeVipClientConfig, service.Namespace)
+	cm, err := k.GetConfigMap(ctx, SimpleClientConfig, service.Namespace)
 	if err != nil {
-		klog.Errorf("The configMap [%s] doensn't exist", KubeVipClientConfig)
+		klog.Errorf("The configMap [%s] doensn't exist", SimpleClientConfig)
 		return nil
 	}
 	// Find the services configuration in the configMap
 	svc, err := k.GetServices(cm)
 	if err != nil {
-		klog.Errorf("The service [%s] in configMap [%s] doensn't exist", service.Name, KubeVipClientConfig)
+		klog.Errorf("The service [%s] in configMap [%s] doensn't exist", service.Name, SimpleClientConfig)
 		return nil
 	}
 
@@ -121,25 +121,25 @@ func (k *kubevipLoadBalancerManager) deleteLoadBalancer(ctx context.Context, ser
 	return err
 }
 
-func (k *kubevipLoadBalancerManager) syncLoadBalancer(ctx context.Context, service *v1.Service) (*v1.LoadBalancerStatus, error) {
+func (k *simpleLoadBalancerManager) syncLoadBalancer(ctx context.Context, service *v1.Service) (*v1.LoadBalancerStatus, error) {
 
 	// Get the clound controller configuration map
-	controllerCM, err := k.GetConfigMap(ctx, KubeVipClientConfig, "kube-system")
+	controllerCM, err := k.GetConfigMap(ctx, SimpleClientConfig, "kube-system")
 	if err != nil {
-		klog.Errorf("Unable to retrieve kube-vip ipam config from configMap [%s] in kube-system", KubeVipClientConfig)
+		klog.Errorf("Unable to retrieve kube-vip ipam config from configMap [%s] in kube-system", SimpleClientConfig)
 		// TODO - determine best course of action, create one if it doesn't exist
-		controllerCM, err = k.CreateConfigMap(ctx, KubeVipClientConfig, "kube-system")
+		controllerCM, err = k.CreateConfigMap(ctx, SimpleClientConfig, "kube-system")
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// Retrieve the kube-vip configuration map
-	namespaceCM, err := k.GetConfigMap(ctx, KubeVipClientConfig, service.Namespace)
+	namespaceCM, err := k.GetConfigMap(ctx, SimpleClientConfig, service.Namespace)
 	if err != nil {
-		klog.Errorf("Unable to retrieve kube-vip service cache from configMap [%s] in [%s]", KubeVipClientConfig, service.Namespace)
+		klog.Errorf("Unable to retrieve kube-vip service cache from configMap [%s] in [%s]", SimpleClientConfig, service.Namespace)
 		// TODO - determine best course of action
-		namespaceCM, err = k.CreateConfigMap(ctx, KubeVipClientConfig, service.Namespace)
+		namespaceCM, err = k.CreateConfigMap(ctx, SimpleClientConfig, service.Namespace)
 		if err != nil {
 			return nil, err
 		}
@@ -151,10 +151,10 @@ func (k *kubevipLoadBalancerManager) syncLoadBalancer(ctx context.Context, servi
 	// Find the services configuration in the configMap
 	svc, err := k.GetServices(namespaceCM)
 	if err != nil {
-		klog.Errorf("Unable to retrieve services from configMap [%s], [%s]", KubeVipClientConfig, err.Error())
+		klog.Errorf("Unable to retrieve services from configMap [%s], [%s]", SimpleClientConfig, err.Error())
 
 		// TODO best course of action, currently we create a new services config
-		svc = &kubevipServices{}
+		svc = &simpleServices{}
 	}
 
 	// Check for existing configuration

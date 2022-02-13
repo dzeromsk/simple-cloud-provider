@@ -32,7 +32,7 @@ import (
 	_ "k8s.io/component-base/metrics/prometheus/clientgo" // load all the prometheus client-go plugins
 	_ "k8s.io/kubernetes/pkg/cloudprovider/providers"
 
-	"github.com/kube-vip/kube-vip-cloud-provider/pkg/provider"
+	"github.com/dzeromsk/simple-cloud-provider/pkg/provider"
 )
 
 func main() {
