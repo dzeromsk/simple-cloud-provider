@@ -1,69 +1,29 @@
-SHELL := /bin/bash
+CHART=charts/simple-cloud-provider/Chart.yaml
+VALUES=charts/simple-cloud-provider/values.yaml
 
-# The name of the executable (default is current directory name)
-TARGET := simple-cloud-provider
-.DEFAULT_GOAL: $(TARGET)
+REPOSITORY:=$(shell python3 scripts/repository.py $(VALUES))
+VERSION:=$(shell python3 scripts/version.py $(CHART))
 
-# These will be provided to the target
-VERSION := 0.1
-BUILD := `git rev-parse HEAD`
+build:
+	docker build -t $(REPOSITORY):$(VERSION) .
 
-# Operating System Default (LINUX)
-TARGETOS=linux
-
-# Use linker flags to provide version/build settings to the target
-LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -s"
-
-# go source files, ignore vendor directory
-SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
-
-DOCKERTAG=$(VERSION)
-REPOSITORY=simple
-
-.PHONY: all build clean install uninstall fmt simplify check run
-
-all: check install
-
-$(TARGET): $(SRC)
-	@go build $(LDFLAGS) -o $(TARGET)
-
-build: $(TARGET)
-	@true
+load:
+	kind load docker-image $(REPOSITORY):$(VERSION)
 
 clean:
-	@rm -f $(TARGET)
+	rm -f simple-cloud-provider-$(VERSION).tgz 
+	rm -rf output/
 
-install:
-	@echo Building and Installing project
-	@go install $(LDFLAGS)
+package: output output/index.yaml
 
-uninstall: clean
-	@rm -f $$(which ${TARGET})
+output/index.yaml: output/simple-cloud-provider-$(VERSION).tgz
+	helm repo index output/
 
-fmt:
-	@gofmt -l -w $(SRC)
+output/simple-cloud-provider-$(VERSION).tgz: simple-cloud-provider-$(VERSION).tgz
+	cp -f simple-cloud-provider-$(VERSION).tgz output/
 
+simple-cloud-provider-$(VERSION).tgz:
+	helm package charts/simple-cloud-provider
 
-# For faster local builds
-image-amd64:
-	@docker buildx build  --platform linux/amd64 --push -t $(REPOSITORY)/$(TARGET):$(DOCKERTAG) .
-	@echo New Multi Architecture Docker image created
-
-image:
-	@docker buildx build  --platform linux/amd64,linux/arm64,linux/arm/v7 --push -t $(REPOSITORY)/$(TARGET):$(DOCKERTAG) .
-	@echo New Multi Architecture Docker image created
-
-simplify:
-	@gofmt -s -l -w $(SRC)
-
-check: test
-	@test -z $(shell gofmt -l main.go | tee /dev/stderr) || echo "[WARN] Fix formatting issues with 'make fmt'"
-	@for d in $$(go list ./... | grep -v /vendor/); do golint $${d}; done
-	@golangci-lint run
-	@go vet ./...
-
-run: install
-	@$(TARGET)
-
-test:
-	go test ./...
+output:
+	mkdir -p output/
