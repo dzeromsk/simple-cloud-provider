@@ -211,7 +211,14 @@ func (k *simpleLoadBalancerManager) syncLoadBalancer(ctx context.Context, servic
 	if err != nil {
 		return nil, err
 	}
-	return &service.Status.LoadBalancer, nil
+
+	return &v1.LoadBalancerStatus{
+		Ingress: []v1.LoadBalancerIngress{
+			{
+				IP: newSvc.Vip,
+			},
+		},
+	}, nil
 }
 
 func discoverAddress(cm *v1.ConfigMap, namespace, configMapName string) (vip string, err error) {
