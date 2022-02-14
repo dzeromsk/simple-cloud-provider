@@ -23,10 +23,10 @@ const (
 	ProviderName = "simple"
 
 	//SimpleCloudConfig is the default name of the load balancer config Map
-	SimpleCloudConfig = "simple"
+	SimpleCloudConfig = "simple-cloud-provider"
 
 	//SimpleClientConfig is the default name of the load balancer config Map
-	SimpleClientConfig = "simple"
+	SimpleClientConfig = "simple-cloud-provider"
 
 	//SimpleServicesKey is the key in the ConfigMap that has the services configuration
 	SimpleServicesKey = "simple-services"
