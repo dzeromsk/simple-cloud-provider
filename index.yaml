@@ -3,6 +3,16 @@ entries:
   simple-cloud-provider:
   - apiVersion: v2
     appVersion: 0.1.2
+    created: "2022-11-05T12:32:56.302867649Z"
+    description: A general purpose kubernetes cloud provider
+    digest: 75d641cb9db231705cb5652b46c08bb62c1306596ce2d004938545f76d4d82f3
+    name: simple-cloud-provider
+    type: application
+    urls:
+    - https://github.com/dzeromsk/simple-cloud-provider/releases/download/simple-cloud-provider-0.1.3/simple-cloud-provider-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: 0.1.2
     created: "2022-02-14T22:21:14.153234045Z"
     description: A general purpose kubernetes cloud provider
     digest: eefd74628745ee2ccc6eddcc6085d21787b06d240000ae0e1c1c0a69d2250787
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://github.com/dzeromsk/simple-cloud-provider/releases/download/simple-cloud-provider-0.1.1/simple-cloud-provider-0.1.1.tgz
     version: 0.1.1
-generated: "2022-02-14T22:21:14.153248244Z"
+generated: "2022-11-05T12:32:56.302890549Z"
