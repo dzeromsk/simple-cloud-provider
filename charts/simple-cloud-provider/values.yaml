@@ -47,3 +47,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+config:
+  cidr-global: 172.18.96.0/24

@@ -61,11 +61,11 @@ helm install simple-cloud-provider/simple-cloud-provider --name simple-cloud-pro
 
 ### Global pool
 
-Any service in any namespace will take an address from the global pool `cidr/range`-global. 
+Any service in any namespace will take an address from the global pool `{cidr,range}-global`.
 
 ### Namespace pool
 
-A service will take an address based upon its namespace pool `cidr/range`-`namespace`. These would look like the following:
+A service will take an address based upon its namespace pool `{cidr,range}-{namespace}`. These would look like the following:
 
 ```
 $ kubectl get configmap -n kube-system simple-cloud-provider -o yaml
@@ -80,18 +80,6 @@ data:
   cidr-development: 192.168.0.210/29
   cidr-finance: 192.168.0.220/29
   cidr-testing: 192.168.0.230/29
-```
-
-## Create an IP pool using a CIDR
-
-```
-kubectl create configmap --namespace kube-system simple-cloud-provider --from-literal cidr-global=192.168.0.220/29
-```
-
-## Create an IP range
-
-```
-kubectl create configmap --namespace kube-system simple-cloud-provider --from-literal range-global=192.168.0.200-192.168.0.202
 ```
 
 ## Multiple pools or ranges
